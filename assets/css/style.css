@@ -1,3 +1,17 @@
-/* body {
+body {
+    background-color: black;
+    color: white;
+}
+
+.title {
+    font-size: 100px;
+    text-align: center;
+}
+
+.container {
     background-color: red;
-} */
+}
+
+.row1, .row2, .row3, .row4, .row5 {
+    text-align: center;
+}
