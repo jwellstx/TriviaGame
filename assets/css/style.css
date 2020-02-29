@@ -1,17 +1,26 @@
-body {
+body, .maincontent {
     background-color: black;
     color: white;
+    text-align: center;
+}
+
+.maincontent {
+    height: 800px;
 }
 
 .title {
     font-size: 100px;
-    text-align: center;
+    margin-bottom: 100px;
+    margin-top: 100px;
 }
 
-.container {
-    background-color: red;
+.start:hover,
+.answer:hover {
+    background-color: brown;
 }
 
-.row1, .row2, .row3, .row4, .row5 {
-    text-align: center;
+.rowCSS {
+    padding: 20px 0px 20px 0px;
+    margin-left: 20%;
+    margin-right: 20%;
 }
