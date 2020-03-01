@@ -5,7 +5,7 @@ body, .maincontent {
 }
 
 .maincontent {
-    height: 800px;
+    height: 100%;
 }
 
 .title {
