@@ -2,6 +2,7 @@ body, .maincontent {
     background-color: black;
     color: white;
     text-align: center;
+    font-family: 'Trade Winds';
 }
 
 .maincontent {
@@ -10,17 +11,26 @@ body, .maincontent {
 
 .title {
     font-size: 100px;
-    margin-bottom: 100px;
+    /* margin-bottom: 100px; */
     margin-top: 100px;
 }
 
 .start:hover,
-.answer:hover {
-    background-color: brown;
+.answer:hover,
+.restart:hover {
+    background-color: goldenrod;
 }
 
 .rowCSS {
     padding: 20px 0px 20px 0px;
     margin-left: 20%;
     margin-right: 20%;
+}
+
+#logo {
+    font-size: 50%;
+    position: relative;
+    top: -20%;
+    left: 20%;
+    color: gold;
 }

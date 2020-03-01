@@ -5,6 +5,12 @@ var game = {
     correct: 0,    // num of correct answers
     incorrect: 0,  // num of incorrect answers
     unanswered: 0, // num of timed out answers
+    themeSong: new Audio("./assets/audio/mariotheme.mp3"),
+    gameOver: new Audio("./assets/audio/mario-gameover.wav"),
+    wrongAnswer: new Audio("./assets/audio/mario-scream.wav"),
+    rightAnswer: new Audio("./assets/audio/mario-yippee.wav"),
+    timeoutAnswer: new Audio("./assets/audio/mario-yawn.wav"),
+    ceremony: new Audio("./assets/audio/ceremony.mp3"),
     questions: [
     {
         question: "Which console was the first to allow for online gaming via a broadband connection, using its integrated ethernet port?",
@@ -16,7 +22,7 @@ var game = {
     },
     {
         question: "Which company purchased Oculus Rift in 2014 for $2 billion?",
-        answers: ["Sony", "Facebook", "Dave&Busters", "Disney"], correctAnswer: "Facebook", img: "https://giphy.com/embed/d6Unw9Ke0vCFO"
+        answers: ["Sony", "Facebook", "Dave&Busters", "Disney"], correctAnswer: "Facebook", img: "assets/images/oculusrift.gif"
     },
     {
         question: "What is the name of the service on the Nintendo Wii, Wii U and 3DS that allows the player to download classic Nintendo video games?",
@@ -28,7 +34,7 @@ var game = {
     },
     {
         question: "Which console was sold using the advertising slogan \"Jump In\"?",
-        answers: ["Game Boy Color", "Xbox 360", "ATARI 2600", "Nintendo Switch"], correctAnswer: "Xbox 360", img: "https://giphy.com/embed/l4FGEZz9sPWzGqLwk"
+        answers: ["Game Boy Color", "Xbox 360", "ATARI 2600", "Nintendo Switch"], correctAnswer: "Xbox 360", img: "assets/images/xbox.gif"
     },
     {
         question: "What code name did Nintendo use for the GameCube before the true name’s reveal in August 2000?",
@@ -44,7 +50,7 @@ var game = {
     },
     {
         question: "On which handheld console did the Pokemon games first appear?",
-        answers: ["Game Boy", "PSP", "Mattel", "Game Boy Advanced"], correctAnswer: "Game Boy", img: "https://giphy.com/embed/7T200DTPdx31e"
+        answers: ["Game Boy", "PSP", "Mattel", "Game Boy Advanced"], correctAnswer: "Game Boy", img: "assets/images/pokemon.gif"
     },
     {
         question: "With over 155 million units sold, what is the best selling home console of all time?",
@@ -52,7 +58,7 @@ var game = {
     },
     {
         question: "Which is not a character of the three playable characters from Grand Theft Auto V?",
-        answers: ["Michael De Santa", "David Wessels", "Franklin Clinton", "Trevor Philips"], correctAnswer: "David Wessels", img: "https://giphy.com/embed/pNlRgCcZQEwcU"
+        answers: ["Michael De Santa", "David Wessels", "Franklin Clinton", "Trevor Philips"], correctAnswer: "David Wessels", img: "assets/images/gtav.gif"
     },
     {
         question: "In online gaming, what does the acronym \"MOBA\" mean?",
@@ -60,11 +66,11 @@ var game = {
     },
     {
         question: "In which video game did Yoshi make his first appearance?",
-        answers: ["Mario Kart", "Yoshi's Woolly World", "Super Mario World", "Super Smash Brothers"], correctAnswer: "Super Mario World", img: "https://giphy.com/embed/y5Fb026uxbAFa"
+        answers: ["Mario Kart", "Yoshi's Woolly World", "Super Mario World", "Super Smash Brothers"], correctAnswer: "Super Mario World", img: "assets/images/yoshi.gif"
     },
     {
         question: "Introduced in the Mario Kart 64 and a staple of the series since, which controversial projectile targets the race leader?",
-        answers: ["The blue spiny shell", "Banana peel", "Mushrooms", "Bowser"], correctAnswer: "The blue spiny shell", img: "https://giphy.com/embed/mypWKslUPQcNy"
+        answers: ["The blue spiny shell", "Banana peel", "Mushrooms", "Bowser"], correctAnswer: "The blue spiny shell", img: "assets/images/blueshell.gif"
     },
     {
         question: "Which is not one of the five colors used on the fret buttons of Guitar Hero controllers?",
@@ -72,11 +78,14 @@ var game = {
     },
     {
         question: "Debuting in 2009, which mobile video game franchise is developed by Rovio entertainment?",
-        answers: ["Turkey Hunt", "Balloons Tower Defense", "Words with Friends", "Angry Birds"], correctAnswer: "Angry Birds", img: "https://giphy.com/embed/l396QehilGkfZzsQw"
+        answers: ["Turkey Hunt", "Balloons Tower Defense", "Words with Friends", "Angry Birds"], correctAnswer: "Angry Birds", img: "assets/images/angrybirds.gif"
     },
     ],
 
     startTrivia: function () {
+        // stop music in case its still playing from last game
+        this.ceremony.pause();
+        this.ceremony.currentTime = 0;
         var mainContent = $('.maincontent');
         var startScreen = $('<h2>').text("Click here to start!").hide();
         startScreen.addClass("start rowCSS");
@@ -86,11 +95,16 @@ var game = {
 
         $('.start').fadeIn(1000);
         // 'this' is no longer in the scope
-        $(document).on("click", ".start", game.setupQ);
+        $(document).on("click", ".start", function(){
+            game.themeSong.play();
+            game.setupQ();
+        });
     },
     setupQ: function () {
-        // !! this function no longer refers to this object but rather the .start object - so use 'game' instead of 'this' !! //
+        // !! this function no longer refers to this object but rather the .start object - so use 'game' instead of 'this' !! TA - is this ok or bad practice?? //
 
+        // clear interval before each question
+        clearInterval(game.timer);
         // check if we are out of questions
         if (game.cI === game.questions.length) {
             // go right to results screen because checkAnswer and Timer will display correct answer screen automatically
@@ -119,13 +133,11 @@ var game = {
         $('.answer').on("click", function () {
             // back to using 'this' becuase we are looking at answer object
             uC = $(this).attr("value").trim();
-            // stop timer if clicked
-            clearInterval(game.timer);
             // check if the user was right
             game.checkAnswer(uC, cA);
         });
 
-        // start the timer at 20sec for every 1s
+        // start the timer at 20sec at 1s interval
         game.timer = setInterval(game.timerFunc, 1000);
     },
 
@@ -137,7 +149,8 @@ var game = {
             game.cI++;
             game.unanswered++;
             game.timeLeft = 20;
-            setTimeout(game.setupQ, 5000);
+            game.timeoutAnswer.play();
+            setTimeout(game.setupQ, 4000);
             return;
         }
         // if not 0, keep counting and upate timer on page
@@ -146,50 +159,67 @@ var game = {
     },
 
     checkAnswer: function (uC, cA) {
+        clearInterval(game.timer);
         // check if user choice (uC) equals correct answer (cA) and show answer screen
         if (uC === cA) {
             game.answerScreen(cA, 0)
             game.correct++;
+            game.rightAnswer.play();
         }
         else {
             game.answerScreen(cA, 1)
             game.incorrect++;
+            game.wrongAnswer.play();
         }
         game.cI++;
         game.timeLeft = 20;
-        setTimeout(game.setupQ, 5000);
+        setTimeout(game.setupQ, 4000);
     },
     answerScreen: function (result, dispAnswer) {
         // depending if dispAnswer is 0,1,2 display different results correct,incorrect,or times up and attached image/gif
+        var mainContent = $('.maincontent');  // so we dont have to keep querying for .maincontent
+
         $('.answer, .question').remove();
         if (dispAnswer === 0) {
-            $('.maincontent').append($('<h2>').text("Correct!"));
+            mainContent.append($('<h2>').text("Correct!"));
         }
         else if (dispAnswer === 1 ) {
-            $('.maincontent').append($('<h2>').text("Incorrect!"));
+            mainContent.append($('<h2>').text("Incorrect!"));
         }
         else if (dispAnswer === 2) {
-            $('.maincontent').append($('<h2>').text("Time is up!"));
+            mainContent.append($('<h2>').text("Time is up!"));
         }
-        $('.maincontent').append($('<h2>').html("The answer is: " + game.questions[game.cI].correctAnswer + "<br><br>"));
-        if (game.questions[game.cI].img.startsWith("http")) {
-            $('.maincontent').append($('<iframe>').attr("src", game.questions[game.cI].img));
-            $('iframe').css({
-                width: "480",
-                height: "270"
-            });
-        }
-        else {
-            $('.maincontent').append($('<img>').attr("src", game.questions[game.cI].img));
-        }
+        mainContent.append($('<h2>').html("The answer is: " + game.questions[game.cI].correctAnswer + "<br><br>"));
+        mainContent.append($('<img>').attr("src", game.questions[game.cI].img));
     },
     resultsScreen: function () {
         // display final score screen
-        $('.maincontent').empty();
-        $('.maincontent').append($('<div>').html("<h1>Results:</h1>"));
-        $('.maincontent').append($('<div>').html("<h2>Correct: " + game.correct + "</h2>"));
-        $('.maincontent').append($('<div>').html("<h2>Incorrect: " + game.incorrect + "</h2>"));
-        $('.maincontent').append($('<div>').html("<h2>Unanswered: " + game.unanswered + "</h2>"));
+        var mainContent = $('.maincontent');
+        mainContent.empty();
+        var percentCorrect = Math.round((game.correct/game.questions.length)*100);
+        this.log(percentCorrect);
+        mainContent.append($('<div>').html("<h1>Results:</h1>"));
+        mainContent.append($('<div>').html("<h2>Correct: " + game.correct + "</h2>"));
+        mainContent.append($('<div>').html("<h2>Incorrect: " + game.incorrect + "</h2>"));
+        mainContent.append($('<div>').html("<h2>Unanswered: " + game.unanswered + "</h2><br>"));
+        mainContent.append($('<div>').html("<h2>You scored " + percentCorrect + "% correct!!<br><br><br>"));
+        mainContent.append($("<div class='restart rowCSS'>").html("<h2>Click to retry!</h2>"));
+
+        game.themeSong.pause();
+        game.themeSong.currentTime = 0;
+        game.gameOver.play();
+        game.ceremony.play();
+
+        $('.restart').on("click", function() {
+            // restart the game
+            game.cI = 0;
+            game.timeLeft = 20;
+            game.correct = 0;
+            game.incorrect = 0;
+            game.unanswered = 0;
+            mainContent.empty();
+            game.startTrivia();
+        });
     },
 
     // laziness
